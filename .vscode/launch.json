@@ -1,0 +1,86 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "type": "java",
+            "name": "Main CSV mit Workflowitem one",
+            "request": "launch",
+            "mainClass": "ch.zhaw.hsb.aurora.enricher.Main",
+            "args": "-controller CSVController -items WorkflowItem -id 8032f56a-8b1a-4edd-ae44-17ab8b51bf17"
+        },
+        {
+            "type": "java",
+            "name": "Main CSV mit PublishedItem one",
+            "request": "launch",
+            "mainClass": "ch.zhaw.hsb.aurora.enricher.Main",
+            "args": "-controller CSVController -items PublishedItem -id 0a355db9-5dbb-4d8e-85bf-af1968645e23" //fhnw: , zhaw: 0a355db9-5dbb-4d8e-85bf-af1968645e23
+        },
+        {
+            "type": "java",
+            "name": "Main CSV mit Workflowitem all",
+            "request": "launch",
+            "mainClass": "ch.zhaw.hsb.aurora.enricher.Main",
+            "args": "-controller CSVController -items WorkflowItem"
+        },
+        {
+            "type": "java",
+            "name": "Main CSV mit PublishedItem all",
+            "request": "launch",
+            "mainClass": "ch.zhaw.hsb.aurora.enricher.Main",
+            "args": "-controller CSVController -items PublishedItem"
+        },
+        {
+            "type": "java",
+            "name": "Main CSV  mit PublishedItem and WorkflowItem all",
+            "request": "launch",
+            "mainClass": "ch.zhaw.hsb.aurora.enricher.Main",
+            "args": "-controller CSVController -items WorkflowItem,PublishedItem"
+        },
+        {
+            "type": "java",
+            "name": "Main Sherpa mit Workflowitem one",
+            "request": "launch",
+            "mainClass": "ch.zhaw.hsb.aurora.enricher.Main",
+            "args": "-controller SherpaRomeoController -items WorkflowItem -id cd5acf6e-d043-4417-9c41-e57f22d42cbd"
+        },
+        {
+            "type": "java",
+            "name": "Main Sherpa mit PublishedItem one",
+            "request": "launch",
+            "mainClass": "ch.zhaw.hsb.aurora.enricher.Main",
+            "args": "-controller SherpaRomeoController -items PublishedItem -id 17f886b0-325a-4dab-b009-01e8ff71aca7"  //fhnw: 15152308-5f55-40e8-bb4e-918a2be43414, zhaw:12adbcb9-3519-4f3a-a51c-e2e99b4dc569
+        },
+        {
+            "type": "java",
+            "name": "Main Sherpa mit PublishedItem one with bad TYPE",
+            "request": "launch",
+            "mainClass": "ch.zhaw.hsb.aurora.enricher.Main",
+            "args": "-controller SherpaRomeoController -items PublishedItem -id 04899546-bb97-4c10-85a1-e37d7e0dd0ae"
+        },
+        {
+            "type": "java",
+            "name": "Main Sherpa mit Workflowitem all",
+            "request": "launch",
+            "mainClass": "ch.zhaw.hsb.aurora.enricher.Main",
+            "args": "-controller SherpaRomeoController -items WorkflowItem"
+        },
+        {
+            "type": "java",
+            "name": "Main Sherpa mit PublishedItem all",
+            "request": "launch",
+            "mainClass": "ch.zhaw.hsb.aurora.enricher.Main",
+            "args": "-controller SherpaRomeoController -items PublishedItem"
+        },
+        {
+            "type": "java",
+            "name": "Main Sherpa mit PublishedItem and WorkflowItem all",
+            "request": "launch",
+            "mainClass": "ch.zhaw.hsb.aurora.enricher.Main",
+            "args": "-controller SherpaRomeoController -items PublishedItem,WorkflowItem"
+        }
+    ]
+}

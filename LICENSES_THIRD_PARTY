@@ -1,0 +1,15 @@
+
+Aurora Enricher uses third-party libraries which may be distributed under different licenses. We have listed all of these third party libraries and their licenses below.
+
+You must agree to the terms of these licenses, in addition to the Aurora Enricher source code license, in order to use this software.
+
+---------------------------------------------------
+Third party Java libraries listed by License type.
+---------------------------------------------------
+
+    Apache Software License, Version 2.0:
+
+        * Jackson-core (com.fasterxml.jackson.core:jackson-core:2.18.2 - https://github.com/FasterXML/jackson-core)
+        * jackson-databind (com.fasterxml.jackson.core:jackson-databind:2.18.2 - http://github.com/FasterXML/jackson)
+        * Apache Commons CSV (org.apache.commons:commons-csv:1.9.0 - https://commons.apache.org/proper/commons-csv/)
+        

@@ -1,0 +1,21 @@
+type.journalArticle = Beitrag in wissenschaftlicher Zeitschrift
+type.book = Buch
+type.bookPart = Buchbeitrag
+type.conferencePaper = Konferenz: Paper
+
+matchString.sherpa.location = Any Repository|Any Website|Institutional Repository|Non-Commercial Repository|Non-Commercial Institutional Repository
+matchString.sherpa.version = Published|Accepted
+
+metadata.sherpa = zhaw.oastatus.aurora
+metadata.sherpa.section = zhawdescriptionclassic
+metadata.csv = zhaw.oastatus.aurora
+metadata.csv.section = zhawdescriptionclassic
+
+url.sherpa =  https://v2.sherpa.ac.uk/cgi/retrieve_by_id/cgi/retrieve_by_id?item-type=publication&format=Json
+
+organisation.repositoryAPI  = https://digitalcollection-dev.zhaw.ch/server/api
+organisation.policyList = files/input/self-archiving-policies.csv
+organisation.unsuccessfulItemList = /var/lib/tomcat9/webapps/hsb-dspace-7/aurora/output/unsuccessful-item-list.csv
+organisation.itemsPerPage = 100
+
+dspace.version = 7.6.0

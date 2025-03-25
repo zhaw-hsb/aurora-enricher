@@ -1,0 +1,20 @@
+type.journalArticle = 01A - Beitrag in wissenschaftlicher Zeitschrift
+type.book = 02 - Monographie
+type.bookPart = 04A - Beitrag Sammelband
+type.conferencePaper = 04B - Beitrag Konferenzschrift
+
+matchString.sherpa.location = Any Repository|Any Website|Institutional Repository|Non-Commercial Repository|Non-Commercial Institutional Repository
+matchString.sherpa.version = Published|Accepted
+
+metadata.sherpa = fhnw.oastatus.aurora
+metadata.csv = fhnw.oastatus.aurora
+
+url.sherpa =  https://v2.sherpa.ac.uk/cgi/retrieve_by_id/cgi/retrieve_by_id?item-type=publication&format=Json
+
+organisation.repositoryAPI  = https://irf.test.fhnw.ch/server/api
+organisation.policyList = files/input/self-archiving-policies.csv
+organisation.unsuccessfulItemList = /var/lib/tomcat9/webapps/hsb-dspace-7/aurora/output/unsuccessful-item-list.csv
+organisation.itemsPerPage = 100
+
+dspace.version = 8.0.0
+
