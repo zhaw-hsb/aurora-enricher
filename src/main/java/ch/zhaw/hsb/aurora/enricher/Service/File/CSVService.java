@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -42,7 +43,7 @@ public class CSVService {
         List<Map<String, String>> records = new ArrayList<>();
 
         try (InputStream inputStream = Main.class.getClassLoader().getResourceAsStream(filePath);  // Pfad zu deiner Datei im Ressourcenordner
-             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
              CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.withFirstRecordAsHeader())) {
 
             if (inputStream == null) {

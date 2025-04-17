@@ -10,6 +10,8 @@ package ch.zhaw.hsb.aurora.enricher.Configuration;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 import ch.zhaw.hsb.aurora.enricher.Main;
@@ -28,9 +30,9 @@ public class PropertyCredentials {
     public PropertyCredentials() {
 
         try (InputStream input = Main.class.getClassLoader().getResourceAsStream(
-                "assets/config/credentials.properties")) {
+                "assets/config/credentials.properties"); InputStreamReader reader = new InputStreamReader(input, StandardCharsets.UTF_8)) {
             Properties prop = new Properties();
-            prop.load(input);
+            prop.load(reader);
             this.prop = prop;
 
         } catch (IOException e) {

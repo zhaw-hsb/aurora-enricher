@@ -10,6 +10,8 @@ package ch.zhaw.hsb.aurora.enricher.Configuration;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -42,8 +44,9 @@ public class Configuration {
         try {
             InputStream input =  Main.class.getClassLoader().getResourceAsStream(
                     "assets/config/organisation.properties");
+            InputStreamReader reader = new InputStreamReader(input, StandardCharsets.UTF_8);
             prop = new Properties();
-            prop.load(input);
+            prop.load(reader);
             configuration = new Configuration();
             return configuration;
 
