@@ -35,9 +35,9 @@ abstract public class ItemServiceAbstract implements ItemServiceInterface {
 
     }
 
-    public String getTypeFilter() {
+    public String getTypeFilter(String controllerName) {
         String typeFilter = null;
-        List<String> types = Configuration.getInstance().getAllByKeyStart("type.");
+        List<String> types = Configuration.getInstance().getAllByKeyStart("type."+controllerName+".");
 
         if (types != null && types.size() > 0) {
 

@@ -1,7 +1,7 @@
-type.journalArticle = 01A - Beitrag in wissenschaftlicher Zeitschrift
-type.book = 02 - Monographie
-type.bookPart = 04A - Beitrag Sammelband
-type.conferencePaper = 04B - Beitrag Konferenzschrift
+type.sherpa.journalArticle = 01A - Beitrag in wissenschaftlicher Zeitschrift
+type.csv.book = 02 - Monographie
+type.csv.bookPart = 04A - Beitrag Sammelband
+type.csv.conferencePaper = 04B - Beitrag Konferenzschrift
 
 matchString.sherpa.location = Any Repository|Any Website|Institutional Repository|Non-Commercial Repository|Non-Commercial Institutional Repository
 matchString.sherpa.version = Published|Accepted
@@ -16,5 +16,5 @@ organisation.policyList = files/input/self-archiving-policies.csv
 organisation.unsuccessfulItemList = /var/lib/tomcat9/webapps/hsb-dspace-7/aurora/output/unsuccessful-item-list.csv
 organisation.itemsPerPage = 100
 
-dspace.version = 8.0.0
+dspace.version = 8.1.0
 

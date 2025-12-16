@@ -42,7 +42,7 @@ public class PublishedItemService extends OrganisationItemServiceAbstract implem
     }
 
     @Override
-    public List<ItemAbstract> getItems(String query) {
+    public List<ItemAbstract> getItems(String query, String controllerName) {
 
         List<ItemAbstract> itemModelList = new ArrayList<>();
 
@@ -53,7 +53,7 @@ public class PublishedItemService extends OrganisationItemServiceAbstract implem
 
             //f.has_content_in_original_bundle=false,equals filter to only receive the ones without fulltext
             HttpResponse<String> response = HTTPService.sendRequest(null, null, this.getBaseURL() + "&page="
-                    + currentPage + "&"+"f.has_content_in_original_bundle=false,equals"+ "&"+ query + "+dc.type:"+ URLEncoder.encode(this.getTypeFilter(), StandardCharsets.UTF_8), "GET", null);
+                    + currentPage + "&"+"f.has_content_in_original_bundle=false,equals"+ "&"+ query + "+dc.type:"+ URLEncoder.encode(this.getTypeFilter(controllerName), StandardCharsets.UTF_8), "GET", null);
 
             String jsonData;
             if (response != null) {

@@ -1,5 +1,8 @@
 # Aurora Enricher
 
+## Version
+This code is compatible with DSpace versions 8.1+ and 7.6.2+. For earlier versions, please use the code from the enricher-1.0 tag.
+
 ## About
 The Enricher was developed as a second tool by the ZHAW Zurich University of Applied Sciences and the University of Applied Sciences and Arts Northwestern Switzerland FHNW as part of the AURORA project co-financed by swissuniversities. The tool is used to enrich publications in the DSpace repository with information on secondary publication. The corresponding data can come from sources such as Open policy finder Jisc (formerly SherpaRomeo) or a CSV list.
 
@@ -89,7 +92,7 @@ Execute the command in the following format:
 In ./src/main/resources/assets/config/organisation.properties
 | field name      | description  | mandatory  | example  |
 | ------------- | ------------- | ------------- |------------- |
-|type.{typeOfPublication}|Name of the type of publication in the repository. The typeOfPublication can be chosen freely, but should occur once.|Yes|type.journalArticle = Beitrag in wissenschaftlicher Zeitschrift|
+|type.{providerName}.{typeOfPublication}|Name of the type of publication in the repository. The typeOfPublication can be chosen freely, but should occur only once per provider.|Yes|type.sherpa.journalArticle = Beitrag in wissenschaftlicher Zeitschrift|
 |matchString.{providerName}.location|A range of publishing options where secondary publishing is permitted. Different locations are separated with \|.|Yes for SherpaRomeo.|matchString.sherpa.location = Any Repository\|Any Website\|Institutional Repository\|Non-Commercial Repository\|Non-Commercial Institutional Repository|
 |matchString.{providerName}.version|Accepted document versions, different version types are separated with \|.|Yes for SherpaRomeo.|matchString.sherpa.version = Published\|Accepted|
 |metadata.{providerName}|Metadata field in the repository where the information on the secondary publication is to be saved.|Yes|metadata.sherpa = zhaw.oastatus.aurora|

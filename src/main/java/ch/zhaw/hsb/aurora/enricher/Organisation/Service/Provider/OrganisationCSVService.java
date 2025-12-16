@@ -34,7 +34,7 @@ public class OrganisationCSVService extends CSVServiceAbstract {
 
         for (Map<String, String> record : records) {
 
-            if (record.get("Publisher").equals(item.getPublisher())
+            if (record.get("Publisher").equalsIgnoreCase(item.getPublisher())
                     && record.get("PublicationType").equals(item.getType())) {
 
                 enrichmentModel.setVersion(record.get("Version"));

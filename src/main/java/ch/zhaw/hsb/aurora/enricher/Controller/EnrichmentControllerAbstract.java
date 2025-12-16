@@ -52,7 +52,7 @@ public abstract class EnrichmentControllerAbstract {
 
         if (itemStateService.fillField(item, enrichmentModel,
                 Configuration.getInstance().getMetadataField(getName()),
-                getSection(item.getType()))) {
+                getSection())) {
             return true;
         }
 
@@ -60,7 +60,7 @@ public abstract class EnrichmentControllerAbstract {
 
     }
 
-    protected String getSection(String type) {
+    protected String getSection() {
 
         return Configuration.getInstance().getMetadataField(getName() + ".section");
 
@@ -85,8 +85,8 @@ public abstract class EnrichmentControllerAbstract {
                         successfullyFilled = this.enrichItems(stateServiceInstance, item);
 
                         if (!successfullyFilled) {
-                            System.out.println("Enrichment model empty for UUID: " + item.getUuid());
-                            System.out.println("Not successful for: "+item.getId()+", "+item.getType()+", "+item.getPublisher()+", "+item.getIssn()+", "+item.getUuid());
+                            System.out.println("Enrichment model empty for UUID " + item.getUuid());
+                            System.out.println("Not successful for UUID  "+ item.getUuid());
                             this.writeToCSV(new ArrayList<>() {
                                 {
                                     add(item);
@@ -94,7 +94,7 @@ public abstract class EnrichmentControllerAbstract {
                             });
                         }else{
 
-                            System.out.println("Successful for UUID: "+item.getUuid());
+                            System.out.println("Successful for UUID "+item.getUuid());
 
                         }
                     } else {
@@ -127,7 +127,7 @@ public abstract class EnrichmentControllerAbstract {
         List<ItemAbstract> items = null;
 
         try {
-            items = itemStateService.getItems(getQuery());
+            items = itemStateService.getItems(getQuery(),getName());
         } catch (NameNotFoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -149,9 +149,9 @@ public abstract class EnrichmentControllerAbstract {
 
             if (!successfullyFilled) {
                 itemModelsNotFilled.add(item);
-                System.out.println("Not successful for: "+item.getId()+", "+item.getType()+", "+item.getPublisher()+", "+item.getIssn()+", "+item.getUuid());
+                System.out.println("Not successful for UUID: " + item.getUuid());
             } else {
-                System.out.println("Successful for UUID: "+item.getUuid());
+                System.out.println("Successful for UUID: " + item.getUuid());
             }
 
         }

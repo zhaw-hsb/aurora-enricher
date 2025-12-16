@@ -22,7 +22,7 @@ import ch.zhaw.hsb.aurora.enricher.Model.Item.ItemAbstract;
 public interface ItemStateServiceInterface {
 
         public boolean fillField(ItemAbstract item,  EnrichmentModel input, String fieldName, String section);
-        public List<ItemAbstract> getItems(String query);
+        public List<ItemAbstract> getItems(String query, String controllerName);
         public ItemAbstract getItemById(String uuid);
 
     

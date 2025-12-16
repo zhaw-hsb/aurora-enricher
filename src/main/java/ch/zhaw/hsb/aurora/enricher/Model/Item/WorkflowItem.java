@@ -16,5 +16,14 @@ package ch.zhaw.hsb.aurora.enricher.Model.Item;
  */
 public class WorkflowItem extends ItemAbstract{
 
+    private int claimedTaskID = -1;
+
+    public int getClaimedTaskID() {
+        return claimedTaskID;
+    }
+
+    public void setClaimedTaskID(int claimedTaskID) {
+        this.claimedTaskID = claimedTaskID;
+    }
     
 }

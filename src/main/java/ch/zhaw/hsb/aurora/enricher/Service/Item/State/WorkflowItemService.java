@@ -45,7 +45,7 @@ public class WorkflowItemService extends OrganisationItemServiceAbstract impleme
         }
 
         @Override
-        public List<ItemAbstract> getItems(String query) {
+        public List<ItemAbstract> getItems(String query, String controllerName) {
 
                 List<ItemAbstract> itemModelList = new ArrayList<>();
 
@@ -57,18 +57,14 @@ public class WorkflowItemService extends OrganisationItemServiceAbstract impleme
                         HttpResponse<String> response = HTTPService.sendRequestWithAuthentication(null, null,
                                         this.getBaseURL()
                                                         + "&configuration=workflow&page=" + currentPage + "&" +query
-                                                        +"+dc.type:"+ URLEncoder.encode(this.getTypeFilter(), StandardCharsets.UTF_8),
+                                                        +"+dc.type:"+ URLEncoder.encode(this.getTypeFilter(controllerName), StandardCharsets.UTF_8),
                                         "GET");
 
                         if (response != null) {
-                                String jsonData = response.body();
-
-
-                                JsonNode jobject;
+                              
                                 try {
-                                        jobject = mapper.readTree(jsonData);
+                                        JsonNode jobject = mapper.readTree(response.body());
                                
-
                                         if (lastPage == 0) {
                                                 lastPage = jobject.get("_embedded").get("searchResult")
                                                                 .get("page").get("totalPages").asInt() - 1;
@@ -84,28 +80,31 @@ public class WorkflowItemService extends OrganisationItemServiceAbstract impleme
                                                                 .get("_embedded")
                                                                 .get("indexableObject").get("_embedded")
                                                                 .get("workflowitem");
+
                                                 String workflowItemID = String.valueOf(workflowItemJson.get("id").asInt());
-                                                System.out.println(workflowItemID);
+                                                JsonNode metadata = workflowItemJson.get("sections");
 
-                                                JsonNode metadata = workflowItemJson.get("_embedded")
-                                                                .get("item")
-                                                                .get("metadata");
-                                                String workflowItemUUID = workflowItemJson.get("_embedded")
-                                                                .get("item")
-                                                                .get("uuid").asText();
-                                                System.out.println(workflowItemUUID);
+                                               HttpResponse<String> itemResponse = HTTPService.sendRequestWithAuthentication(null, null,
+                                                        this.configuration.getOrganisationField("repositoryAPI")
+                                                                        + "/workflow/workflowitems/"
+                                                                        + workflowItemID
+                                                                        +"/item",
+                                                        "GET");
 
-                                                WorkflowItem workflowItem = new WorkflowItem();
-                                                workflowItem.setId(workflowItemID);
-                                                workflowItem.setUuid(workflowItemUUID);
 
-                                                itemModelList.add(this.getMetadataFromItem(workflowItem, metadata));
+                                                if(itemResponse != null){
+                                                        WorkflowItem workflowItem = new WorkflowItem();
+                                                        workflowItem.setId(workflowItemID);
+                                                        workflowItem.setUuid(mapper.readTree(itemResponse.body()).get("uuid").asText());
+
+                                                        itemModelList.add(this.getMetadataFromItem(workflowItem, metadata));
+                                                }
+                                                
 
                                         }
 
                                 } catch (JsonProcessingException e) {
-                                        // TODO Auto-generated catch block
-                                        e.printStackTrace();
+                                        
                                 }
 
                         }
@@ -123,30 +122,25 @@ public class WorkflowItemService extends OrganisationItemServiceAbstract impleme
         public boolean fillField(ItemAbstract item, EnrichmentModel input, String fieldName,
                         String section) {
 
-                WorkflowItem workflowItem = (WorkflowItem) item;
-
-                System.out.println(item.getId());
-
-                // PUT /api/core/items/<:uuid>
-                // https://github.com/DSpace/RestContract/blob/dspace-7_x/items.md
-
                 if (input == null) {
                         return false;
                 }
 
+                WorkflowItem workflowItem = (WorkflowItem) item;
                 String preparedInput = this.prepareFieldInput(input, "/sections/" + section + "/" + fieldName, "add");
 
-                Integer claimedID = -1;
-
                 // check if item already claimed
-
-                if (HTTPService.sendRequestWithAuthentication(null, null,
+                HttpResponse<String> responseIsClaimedTask = HTTPService.sendRequestWithAuthentication(null, null,
                                 this.configuration.getOrganisationField("repositoryAPI")
                                                 + "/workflow/claimedtasks/search/findByItem?uuid="
                                                 + workflowItem.getUuid(),
-                                "GET") == null) {
+                                "GET");
 
-                        HttpResponse<String> response = HTTPService
+
+
+                if ( responseIsClaimedTask == null) {
+                        //search in pool for item
+                        HttpResponse<String> responseTaskInPool = HTTPService
                                         .sendRequestWithAuthentication(null, null,
                                                                 this.configuration
                                                                         .getOrganisationField("repositoryAPI")
@@ -154,15 +148,14 @@ public class WorkflowItemService extends OrganisationItemServiceAbstract impleme
                                                                         + workflowItem.getUuid(),
                                                         "GET");
 
-                        if (response != null) {
+                        if (responseTaskInPool != null) {
 
-                                String responseBodyPoolTask = response.body();
-                                Integer poolTaskID;
+                                
                                 try {
-                                        poolTaskID = mapper.readTree(responseBodyPoolTask).get("id").asInt();
+                                        int poolTaskID = mapper.readTree(responseTaskInPool.body()).get("id").asInt();
                                
-
-                                        HttpResponse<String> response2 = HTTPService.sendRequestWithAuthentication(
+                                        //claim pooltask
+                                        HttpResponse<String> responseTaskClaimed = HTTPService.sendRequestWithAuthentication(
                                                         this.configuration.getOrganisationField("repositoryAPI")
                                                                         + "/workflow/pooltasks/"
                                                                         + poolTaskID,
@@ -171,54 +164,61 @@ public class WorkflowItemService extends OrganisationItemServiceAbstract impleme
                                                                         + "/workflow/claimedtasks",
                                                         "POST");
 
-                                        if (response2 != null) {
-                                                String responseBodyClaimedTask = response2.body();
-                                                claimedID = mapper.readTree(responseBodyClaimedTask).get("id").asInt();
+                                        if (responseTaskClaimed != null) {
+                                                workflowItem.setClaimedTaskID(mapper.readTree(responseTaskClaimed.body()).get("id").asInt());
                                         }
 
                                 } catch (JsonProcessingException e) {
-                                        // TODO Auto-generated catch block
-                                        e.printStackTrace();
+                                        
                                 }
 
                         }
 
+                }else{
+                        try{
+                                //set ID for already claimed tasks
+                                workflowItem.setClaimedTaskID(mapper.readTree(responseIsClaimedTask.body()).get("id").asInt());
+
+                        } catch (JsonProcessingException e) {
+                               
+                        }
+
+
                 }
 
-                HttpResponse<String> response = HTTPService.sendRequestWithAuthentication(preparedInput,
-                                "application/json",
-                                this.configuration.getOrganisationField("repositoryAPI")
-                                                + "/workflow/workflowitems/"
-                                                + workflowItem.getId(),
-                                "PATCH");
-                if (response != null) {
+                if(workflowItem.getClaimedTaskID() != -1){
 
-                        String responseBody = response.body();
+                        //fill field
+                        HttpResponse<String> responseFillField = HTTPService.sendRequestWithAuthentication(preparedInput,
+                                        "application/json",
+                                        this.configuration.getOrganisationField("repositoryAPI")
+                                                        + "/workflow/workflowitems/"
+                                                        + workflowItem.getId(),
+                                        "PATCH");
+                        if (responseFillField != null) {
 
-                        // return item back to pool only if we added it to claimedtasks before
-                        if (claimedID != -1) {
-
-                                HttpResponse<String> response2 = HTTPService.sendRequestWithAuthentication(
+                                // return all items back to pool
+                                HttpResponse<String> responseReturnToPool = HTTPService.sendRequestWithAuthentication(
                                                 null, null,
                                                 this.configuration.getOrganisationField("repositoryAPI")
                                                                 + "/workflow/claimedtasks/"
-                                                                + claimedID,
+                                                                + workflowItem.getClaimedTaskID(),
                                                 "DELETE");
-                                String responseBodyDeleteFromClaimedTask = response2.body();
 
-                                if (responseBodyDeleteFromClaimedTask == null) {
+                                if (responseReturnToPool.body() == null) {
 
                                         return false;
 
                                 }
+                                
+
+                                if (responseFillField.body() != null) {
+
+                                        return true;
+
+                                }
+
                         }
-
-                        if (responseBody != null) {
-
-                                return true;
-
-                        }
-
                 }
 
                 return false;
@@ -228,19 +228,18 @@ public class WorkflowItemService extends OrganisationItemServiceAbstract impleme
         @Override
         public ItemAbstract getItemById(String uuid) {
 
-                HttpResponse<String> response = HTTPService.sendRequestWithAuthentication(null, null,
+                HttpResponse<String> responseWorkflowItem = HTTPService.sendRequestWithAuthentication(null, null,
                 this.configuration.getOrganisationField("repositoryAPI")
                                 + "/workflow/workflowitems/search/item?uuid=" + uuid,
                 "GET");
-                if(response != null){
+                if(responseWorkflowItem != null){
 
                         JsonNode jsonNode;
                         try {
-                                jsonNode = mapper.readTree(response.body());
+                                jsonNode = mapper.readTree(responseWorkflowItem.body());
                         
                                 Integer workflowItemId = jsonNode.get("id").asInt();
-                                JsonNode metadata = jsonNode.get("_embedded").get("item")
-                                                .get("metadata");
+                                JsonNode metadata = jsonNode.get("sections");
                 
                                 WorkflowItem workflowItem = new WorkflowItem();
                                 workflowItem.setId(workflowItemId.toString());
@@ -249,13 +248,49 @@ public class WorkflowItemService extends OrganisationItemServiceAbstract impleme
                                 return this.getMetadataFromItem(workflowItem, metadata);
                                 
                         } catch (JsonProcessingException e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
+
                         }
 
                 }
                 return null;
                 
+
+        }
+        
+        @Override
+        public ItemAbstract getMetadataFromItem(ItemAbstract item, JsonNode sectionsNode) {
+
+                if (sectionsNode.isEmpty()) {
+                        return item;
+                }
+
+                if (sectionsNode != null) {
+                        for (JsonNode sectionNode : sectionsNode) {
+                                try {
+                                item.setIssn(
+                                        sectionNode.get("dc.identifier.issn").get(0).get("value").asText());
+                                } catch (NullPointerException e) {
+
+                                }
+
+                                try {
+                                item.setPublisher(
+                                        sectionNode.get("dc.publisher").get(0).get("value").asText());
+
+                                } catch (NullPointerException e) {
+
+                                }
+                                try {
+                                item.setType(
+                                        sectionNode.get("dc.type").get(0).get("value").asText());
+
+                                } catch (NullPointerException e) {
+
+                                }
+                        }
+                }
+
+                return item;
 
         }
 

@@ -1,5 +1,8 @@
 # Aurora Enricher
 
+## Version
+Dieser Code funktioniert mit DSpace Version 8.1+ und 7.6.2+. Für ältere Versionen nutzen Sie bitte den Code aus dem Tag enricher-1.0.
+
 ## Über
 Der Enricher wurde im Rahmen des von swissuniversities ko-finanzierten Projekts AURORA als zweites Tool von der ZHAW Zürcher Hochschule für Angewandte Wissenschaften und der Fachhochschule Nordwestschweiz FHNW entwickelt. Das Tool wird zur Anreicherung von Publikationen im DSpace-Repositorium mit Informationen zur Zweitveröffentlichung eingesetzt. Die entsprechenden Daten können unter anderem aus Quellen wie Open policy finder Jisc (ehemals SherpaRomeo) oder einer eigenen CSV-Liste stammen.
 
@@ -89,7 +92,7 @@ Führen Sie den Befehl in folgendem Format aus:
 Im ./src/main/resources/assets/config/organisation.properties
 | Feldname      | Beschreibung  | Pflicht  | Beispiel  |
 | ------------- | ------------- | ------------- |------------- |
-|type.{typeOfPublication}|Name des Typs der Publikation im Repositorium. Der typeOfPublication kann frei gewählt werden, sollte jedoch einmalig vorkommen.|Ja|type.journalArticle = Beitrag in wissenschaftlicher Zeitschrift|
+|type.{providerName}.{typeOfPublication}|Name des Typs der Publikation im Repositorium. Der typeOfPublication kann frei gewählt werden, , sollte jedoch je Provider nur einmal vorkommen.|Ja|type.sherpa.journalArticle = Beitrag in wissenschaftlicher Zeitschrift|
 |matchString.{providerName}.location|Eine Reihe von Veröffentlichungsoptionen, wo eine Zweitveröffentlichung gestattet ist. Verschiedene Orte werden mit \| getrennt.|Ja für SherpaRomeo.|matchString.sherpa.location = Any Repository\|Any Website\|Institutional Repository\|Non-Commercial Repository\|Non-Commercial Institutional Repository|
 |matchString.{providerName}.version|Akzeptierte Dokumentenversionen, verschiedene Versionstypen werden mit \| getrennt.|Ja für SherpaRomeo.|matchString.sherpa.version = Published\|Accepted|
 |metadata.{providerName}|Metadatenfeld im Repositorium,wo die Informationen zur Zweitveröffentlichung gespeichert werden sollen.|Ja|metadata.sherpa = zhaw.oastatus.aurora|

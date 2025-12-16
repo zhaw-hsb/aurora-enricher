@@ -25,6 +25,6 @@ public interface ItemServiceInterface {
         public String prepareFieldInput(EnrichmentModel input, String itemPath, String op);
         public ItemAbstract getMetadataFromItem(ItemAbstract item, JsonNode metadata);
         public String getBaseURL();
-        public String getTypeFilter();
+        public String getTypeFilter(String controllerName);
     
 }
