@@ -52,7 +52,7 @@ Falls keine UUID angegeben wird, führt das Tool die Anreicherung über alle Ite
 
 ## Voraussetzungen
 - Java Version 17
-- Repositorium in DSpace 7+
+- Repositorium in DSpace 7.6.2+ / 8.1+
 
 
 ## Installation

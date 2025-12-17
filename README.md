@@ -53,7 +53,7 @@ If no UUID is specified, the tool performs the enrichment across all items of th
 
 ## Prerequisites
 - Java version 17
-- Repository in DSpace 7+
+- Repository in DSpace 7.6.2+ / 8.1+
 
 ## Installation
 - Preparations in DSpace - create secondary publishing rights field, set rights (admin)
