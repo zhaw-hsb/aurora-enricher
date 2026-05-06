@@ -21,12 +21,13 @@ import ch.zhaw.hsb.aurora.enricher.Organisation.Service.Provider.OrganisationCSV
  */
 public class CSVController extends OrganisationControllerAbstract {
 
-    public CSVController(String uuid, List<Class<?>> itemModelClassList) {
+    public CSVController(String uuid, List<Class<?>> itemModelClassList, Boolean updateAll) {
 
         this.organisationProviderService = new OrganisationCSVService(this.getName());
 
         this.uuid = uuid;
         this.itemModelClassList = itemModelClassList;
+        this.updateAll = updateAll;
     }
 
     @Override

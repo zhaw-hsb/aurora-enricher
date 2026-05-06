@@ -14,7 +14,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 
 import ch.zhaw.hsb.aurora.enricher.Configuration.Configuration;
-import ch.zhaw.hsb.aurora.enricher.Configuration.PropertyCredentials;
+import ch.zhaw.hsb.aurora.enricher.Configuration.PropertyCredentialsConfiguration;
 
 /**
  * This class is the service for authentication with the DSpace repository.
@@ -43,7 +43,7 @@ public class AuthenticationService {
 
     private String generateBearer() {
 
-        PropertyCredentials propertyCredentials = new PropertyCredentials();
+        PropertyCredentialsConfiguration propertyCredentials = new PropertyCredentialsConfiguration();
 
         String username = propertyCredentials.getUsername();
         String password = propertyCredentials.getPassword();

@@ -30,12 +30,12 @@ abstract public class  OrganisationItemServiceAbstract extends ItemServiceAbstra
 
         String delimiter = " *** ";
         String inputValue = "Version: " + input.getVersion() + delimiter;
-        if(input.getEmbargoAmount()<0 && input.getEmbargoUnit()==null){
+        if(input.getEmbargoAmount()<0 && input.getEmbargoUnit().isEmpty()){
             inputValue = inputValue + "Embargo: None" + delimiter;
         }else{
             inputValue = inputValue +"Embargo: " + input.getEmbargoAmount() + " " + input.getEmbargoUnit() + delimiter;
         }
-        if(input.getLicense() == null || input.getLicense().equals("")){
+        if(input.getLicense() == null || input.getLicense().isEmpty()){
             inputValue = inputValue + "Licence: None"+ delimiter;
 
         }else{

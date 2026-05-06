@@ -16,6 +16,8 @@ import javax.naming.NameNotFoundException;
 
 import ch.zhaw.hsb.aurora.enricher.Configuration.Configuration;
 import ch.zhaw.hsb.aurora.enricher.Factory.ServiceFactory;
+import ch.zhaw.hsb.aurora.enricher.LogCollector.AdminLogCollector;
+import ch.zhaw.hsb.aurora.enricher.LogCollector.HelpdeskLogCollector;
 import ch.zhaw.hsb.aurora.enricher.Model.Enrichment.EnrichmentModel;
 import ch.zhaw.hsb.aurora.enricher.Model.Item.ItemAbstract;
 import ch.zhaw.hsb.aurora.enricher.Service.File.CSVService;
@@ -33,17 +35,30 @@ public abstract class EnrichmentControllerAbstract {
     protected String uuid;
     protected List<Class<?>> itemModelClassList;
     protected ProviderServiceAbstract organisationProviderService;
+    protected boolean updateAll;
 
     abstract public String getName();
 
-    protected String getQuery() throws NameNotFoundException {
+    protected String getMissingMetadataFilter() throws NameNotFoundException {
 
-        String value = Configuration.getInstance().getMetadataField(this.getName());
-        if (value != null) {
-            return "query=-" + value + ":*";
+        String metadataField = Configuration.getInstance().getMetadataField(this.getName());
+        if (metadataField == null) {
+
+            throw new NameNotFoundException("Metadata field for " + this.getName() + " has not been found");
 
         }
-        throw new NameNotFoundException("Metadata field for " + this.getName() + " has not been found");
+
+        //filter to search for all publications, also those with filled metadataField
+        if(updateAll){
+            return "";
+        }
+
+        //filter to only get publications where the metadataField is not filled yet
+        return "-" + metadataField + ":*";
+
+
+        
+
 
     }
 
@@ -85,8 +100,8 @@ public abstract class EnrichmentControllerAbstract {
                         successfullyFilled = this.enrichItems(stateServiceInstance, item);
 
                         if (!successfullyFilled) {
-                            System.out.println("Enrichment model empty for UUID " + item.getUuid());
-                            System.out.println("Not successful for UUID  "+ item.getUuid());
+                            HelpdeskLogCollector.logInfo("Enrichment model empty for UUID " + item.getUuid());
+                            HelpdeskLogCollector.logInfo("Not successful for UUID  "+ item.getUuid());
                             this.writeToCSV(new ArrayList<>() {
                                 {
                                     add(item);
@@ -94,11 +109,11 @@ public abstract class EnrichmentControllerAbstract {
                             });
                         }else{
 
-                            System.out.println("Successful for UUID "+item.getUuid());
+                            HelpdeskLogCollector.logInfo("Successful for UUID "+item.getUuid());
 
                         }
                     } else {
-                        System.out.println("Not successful: item "+this.uuid+" not found.");
+                        HelpdeskLogCollector.logInfo("Not successful: item "+this.uuid+" not found.");
                     }
 
                 } else {
@@ -110,8 +125,7 @@ public abstract class EnrichmentControllerAbstract {
             } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
                     | InvocationTargetException | NoSuchMethodException | SecurityException e) {
 
-                System.out.println(e);
-                System.exit(1);
+                AdminLogCollector.logErrorAndExit("",e);
 
             }
 
@@ -127,13 +141,16 @@ public abstract class EnrichmentControllerAbstract {
         List<ItemAbstract> items = null;
 
         try {
-            items = itemStateService.getItems(getQuery(),getName());
+            items = itemStateService.getItems(getMissingMetadataFilter(),getName());
         } catch (NameNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            AdminLogCollector.logErrorAndExit("Name not found.", e);
         }
 
         List<ItemAbstract> itemModelsNotFilled = new ArrayList<>();
+
+        HelpdeskLogCollector.logInfo(items.size()+" items found in repository.");
+
+        int successfulCounter = 0;
 
         for (ItemAbstract item : items) {
 
@@ -144,21 +161,26 @@ public abstract class EnrichmentControllerAbstract {
                 successfullyFilled = this.fillProviderField(itemStateService, item, enrichmentModel);
 
             } else {
-                System.out.println("Enrichment model empty for UUID: " + item.getUuid());
+                HelpdeskLogCollector.logInfo("Enrichment model empty for UUID: " + item.getUuid());
             }
 
             if (!successfullyFilled) {
                 itemModelsNotFilled.add(item);
-                System.out.println("Not successful for UUID: " + item.getUuid());
+                HelpdeskLogCollector.logInfo("Not successful for UUID: " + item.getUuid());
             } else {
-                System.out.println("Successful for UUID: " + item.getUuid());
+                HelpdeskLogCollector.logInfo("Successful for UUID: " + item.getUuid());
+                successfulCounter++;
             }
 
         }
 
         if (itemModelsNotFilled.size() > 0) {
             this.writeToCSV(itemModelsNotFilled);
+            HelpdeskLogCollector.logInfo(itemModelsNotFilled.size()+" items not filled.");
+        }
 
+        if(successfulCounter > 0){
+            HelpdeskLogCollector.logInfo(successfulCounter+" items filled.");
         }
 
         return true;
@@ -173,7 +195,7 @@ public abstract class EnrichmentControllerAbstract {
     }
 
     private void writeToCSV(List<ItemAbstract> items) {
-        System.out.println("Write unsuccessful items to csv.");
+        HelpdeskLogCollector.logInfo("Write unsuccessful items to csv.");
         String filePath = Configuration.getInstance().getOrganisationField("unsuccessfulItemList");
         CSVService.writeItemAndEnrichmentToCSV(items, filePath);
 

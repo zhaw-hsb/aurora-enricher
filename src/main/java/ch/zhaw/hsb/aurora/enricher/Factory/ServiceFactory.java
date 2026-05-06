@@ -10,6 +10,7 @@ package ch.zhaw.hsb.aurora.enricher.Factory;
 
 import java.lang.reflect.InvocationTargetException;
 
+import ch.zhaw.hsb.aurora.enricher.LogCollector.AdminLogCollector;
 import ch.zhaw.hsb.aurora.enricher.Model.Item.ItemAbstract;
 import ch.zhaw.hsb.aurora.enricher.Service.Item.State.ItemStateServiceInterface;
 
@@ -39,13 +40,10 @@ public class ServiceFactory {
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException
                 | InvocationTargetException | NoSuchMethodException | SecurityException e) {
             if (e instanceof InvocationTargetException) {
-                e.printStackTrace();
                 Throwable cause = e.getCause();
-                System.out.println("Cause of the InvocationTargetException: " + cause);
+                AdminLogCollector.logWarning("Cause of the InvocationTargetException: " + cause, e);
             }
-            System.out.println(e);
-            System.out.println("ItemStateServiceClass not found.");
-            System.exit(1);
+            AdminLogCollector.logErrorAndExit("ItemStateServiceClass not found.", e);
         }
         return null;
 

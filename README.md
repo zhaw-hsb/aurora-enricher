@@ -19,6 +19,7 @@ The Enricher was developed as a second tool by the ZHAW Zurich University of App
     - [Options](#options)
     - [Examples](#examples)
 - [Configurations](#configurations)
+    - [Log mails](#logmails)
 - [Controllers](#controllers)
     - [EnrichmentControllerAbstract](#enrichmentcontrollerabstract)
     - [SherpaRomeoController](#sherparomeocontroller)
@@ -63,6 +64,15 @@ If no UUID is specified, the tool performs the enrichment across all items of th
    ```
    mvn clean package
    ```
+   or with profile (see [Configurations](#configurations))
+   ```
+   mvn clean package -Pdev
+   mvn clean package -Ptest
+   mvn clean package -Pprod
+   ```
+
+  The file is then located in the target folder.
+
 - Carry out process integration in DSpace
 
 ## Usage
@@ -70,7 +80,7 @@ If no UUID is specified, the tool performs the enrichment across all items of th
 Execute the command in the following format:
 
 ```bash
- java -jar ./target/enricher-jar-with-dependencies.jar -controller [option] -items [option] -id [option]
+ java -jar ./target/enricher-jar-with-dependencies.jar -controller [option] -items [option] -id [option] -updateAll
 ```
 
 ### Options
@@ -79,6 +89,7 @@ Execute the command in the following format:
 | `-controller` | The name of the controller to be used.<br> <br>For example: <br>SherpaRomeoController  | Yes       |
 | `-items` |   The state of item(s). WorkflowItem, PublishedItem or both.  | Yes |
 | `-id` | The UUID of an item from the repository.| No |
+| `-updateAll` | If the publications that have already been annotated are to be reviewed again, the flag shall be activated.| No |
 ### Examples
 ```bash
 -controller CSVController -items WorkflowItem -id 8032f56a-8b1a-4edd-ae44-17ab8b51bf17
@@ -86,6 +97,8 @@ Execute the command in the following format:
 -controller SherpaRomeoController -items PublishedItem
 
 -controller SherpaRomeoController -items PublishedItem,WorkflowItem
+
+-controller SherpaRomeoController -items PublishedItem -updateAll
 ```
 
 ## Configurations
@@ -97,12 +110,53 @@ In ./src/main/resources/assets/config/organisation.properties
 |matchString.{providerName}.version|Accepted document versions, different version types are separated with \|.|Yes for SherpaRomeo.|matchString.sherpa.version = Published\|Accepted|
 |metadata.{providerName}|Metadata field in the repository where the information on the secondary publication is to be saved.|Yes|metadata.sherpa = zhaw.oastatus.aurora|
 |metadata.{providerName}.section|The section in the repository of the metadata field that stores the secondary publication information. |Yes, unless the section is set dynamically.|metadata.sherpa.section = zhawdescriptionclassic|
-|url.{providerName}|The URL of the provider's API.|Yes for SherpaRomeo|url.sherpa =  https://v2.sherpa.ac.uk/cgi/retrieve_by_id/cgi/retrieve_by_id?item-type=publication&format=Json|
-|organisation.repositoryAPI| The URL of the server API of the repository.|Yes|https://digitalcollection.zhaw.ch/server/api|
+|url.{providerName}|The URL of the provider's API.|Yes for SherpaRomeo|url.sherpa =  https://api.openpolicyfinder.jisc.ac.uk/retrieve_by_id?item-type=publication&format=Json|
+|organisation.repositoryAPI| The URL of the server API of the repository.|Yes|https://digitalcollection.zhaw.ch/server/api or ${app.url}/server/api (with pom.xml profiles)|
 |organisation.policyList |The path to the list with the information on the secondary publication.|Yes for CSVController.|organisation.policyList = files/input/self-archiving-policies.csv|
 |organisation.unsuccessfulItemList|The path to the list of items for which the enrichment was unsuccessful.|Yes|organisation.unsuccessfulItemList = /path/to/output/folder/unsuccessful-item-list.csv|
 |organisation.itemsPerPage|How many items per page should be queried by the API.|Yes|organisation.itemsPerPage = 100|
 |dspace.version|DSpace Version to set how the csrf token is received.|Yes|dspace.version = 7.6.0|
+
+Configuration in pom.xml, if the organisation.repositoryAPIUrl needs to be adjusted depending on the environment (Maven profile). Example for a production and test environment with different URLs:
+
+```
+<profiles>
+  <profile>
+    <id>test</id>
+    <properties>
+      <maven.compiler.source>
+        17
+      </maven.compiler.source>
+      <maven.compiler.target>
+        17
+      </maven.compiler.target>
+      <encoding>
+        UTF-8
+      </encoding>
+      <app.url>
+        https://digitalcollection-test.zhaw.ch
+      </app.url>
+    </properties>
+  </profile>
+  <profile>
+    <id>prod</id>
+    <properties>
+      <maven.compiler.source>
+        17
+      </maven.compiler.source>
+      <maven.compiler.target>
+        17
+      </maven.compiler.target>
+      <encoding>
+        UTF-8
+      </encoding>
+      <app.url>
+        https://digitalcollection.zhaw.ch
+      </app.url>
+    </properties>
+  </profile>
+</profiles>
+```
 
 To be able to enrich the metadata field, a user with admin and workflow rights is created with access to the items in the repository.
 
@@ -113,6 +167,34 @@ In ./src/main/resources/assets/config/credentials.properties
 |username|The user email.|Yes|manumusterperson@muster.ch|
 |password|The password of the user.|Yes|admin123|
 |apikey.sherpa|The api key of SherpaRomeo.|Yes|XXX-XXX|
+
+<a name="logmails"/>
+
+### Log mails
+src/main/resources/assets/config/organisation.properties
+
+The logs are grouped into two categories (Admin / Helpdesk) and sent to the relevant email address at the end of the program.
+
+| field name      | description  | mandatory  | example  |
+| ------------- | ------------- | ------------- | ------------- |
+| organisation.mail.admin	 | E-mail recipient for admin logs.	 | Yes | manumusterperson@muster.ch |
+| organisation.mail.helpdesk	 | E-mail recipient for helpdesk logs.	 | Yes | manumusterperson@muster.ch |
+
+src/main/resources/assets/config/credentials.properties
+| field name      | description  | mandatory  | example  |
+| ------------- | ------------- | ------------- | ------------- |
+| mail	 | The email address of the sender of the log emails. | Yes | manumusterperson@muster.ch |
+| mail.password	 | The password for the email address of the sender of the log emails.	 | Yes | admin123 |
+
+The LogCollectors and the EmailReportService are located here:
+- src/main/java/ch/zhaw/hsb/aurora/enricher/Service/Email/EmailReportService.java
+- src/main/java/ch/zhaw/hsb/aurora/enricher/LogCollector/AdminLogCollector.java
+- src/main/java/ch/zhaw/hsb/aurora/enricher/LogCollector/HelpdeskLogCollector.java
+
+Various logs can be collected:
+- Informations (logInfo) - HelpdeskLogCollector and AdminLogCollector
+- Warnings (logWarning) - only in AdminLogCollector
+- Errors (logErrorAndExit) -  only in AdminLogCollector, and the program exits.
 
 ## Controllers
 

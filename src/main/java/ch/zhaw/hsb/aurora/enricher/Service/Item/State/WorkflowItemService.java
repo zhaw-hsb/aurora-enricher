@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import ch.zhaw.hsb.aurora.enricher.Configuration.Configuration;
+import ch.zhaw.hsb.aurora.enricher.LogCollector.AdminLogCollector;
 import ch.zhaw.hsb.aurora.enricher.Model.Enrichment.EnrichmentModel;
 import ch.zhaw.hsb.aurora.enricher.Model.Item.ItemAbstract;
 import ch.zhaw.hsb.aurora.enricher.Model.Item.WorkflowItem;
@@ -45,7 +46,7 @@ public class WorkflowItemService extends OrganisationItemServiceAbstract impleme
         }
 
         @Override
-        public List<ItemAbstract> getItems(String query, String controllerName) {
+        public List<ItemAbstract> getItems(String missingMetadataFilter, String controllerName) {
 
                 List<ItemAbstract> itemModelList = new ArrayList<>();
 
@@ -54,11 +55,13 @@ public class WorkflowItemService extends OrganisationItemServiceAbstract impleme
 
                 while (currentPage <= lastPage) {
 
-                        HttpResponse<String> response = HTTPService.sendRequestWithAuthentication(null, null,
-                                        this.getBaseURL()
-                                                        + "&configuration=workflow&page=" + currentPage + "&" +query
-                                                        +"+dc.type:"+ URLEncoder.encode(this.getTypeFilter(controllerName), StandardCharsets.UTF_8),
-                                        "GET");
+                        String url = this.getBaseURL() + "&configuration=workflow&page=" + currentPage + "&query=" 
+                                        +"dc.type:"+ URLEncoder.encode(this.getTypeFilter(controllerName), StandardCharsets.UTF_8);
+                        if(!missingMetadataFilter.isEmpty()){
+                                url = url.concat(missingMetadataFilter);
+                        }
+
+                        HttpResponse<String> response = HTTPService.sendRequestWithAuthentication(null, null, url, "GET");
 
                         if (response != null) {
                               
@@ -104,7 +107,7 @@ public class WorkflowItemService extends OrganisationItemServiceAbstract impleme
                                         }
 
                                 } catch (JsonProcessingException e) {
-                                        
+                                        AdminLogCollector.logErrorAndExit("Items could not be retrieved.", e);   
                                 }
 
                         }
@@ -169,7 +172,7 @@ public class WorkflowItemService extends OrganisationItemServiceAbstract impleme
                                         }
 
                                 } catch (JsonProcessingException e) {
-                                        
+                                        AdminLogCollector.logErrorAndExit("Items could not be retrieved.", e);     
                                 }
 
                         }
@@ -180,6 +183,9 @@ public class WorkflowItemService extends OrganisationItemServiceAbstract impleme
                                 workflowItem.setClaimedTaskID(mapper.readTree(responseIsClaimedTask.body()).get("id").asInt());
 
                         } catch (JsonProcessingException e) {
+                                
+                                AdminLogCollector.logErrorAndExit("Claimed task ID could not be set.", e);
+
                                
                         }
 
@@ -248,6 +254,9 @@ public class WorkflowItemService extends OrganisationItemServiceAbstract impleme
                                 return this.getMetadataFromItem(workflowItem, metadata);
                                 
                         } catch (JsonProcessingException e) {
+
+                           AdminLogCollector.logErrorAndExit("Item could not be returned.", e);
+
 
                         }
 

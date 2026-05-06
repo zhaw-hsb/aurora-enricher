@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import ch.zhaw.hsb.aurora.enricher.Main;
+import ch.zhaw.hsb.aurora.enricher.LogCollector.AdminLogCollector;
 
 /**
  * This class retrieves configuration properties from the organisation.properties file. 
@@ -41,9 +42,16 @@ public class Configuration {
             return configuration;
         }
 
+        String path = "assets/config/organisation.properties";
+        String localPath = "assets/config/organisation-local.properties";
+
+         if(Main.class.getClassLoader().getResource(localPath) != null){
+                path = localPath.toString();
+        }
+
         try {
             InputStream input =  Main.class.getClassLoader().getResourceAsStream(
-                    "assets/config/organisation.properties");
+                    path);
             InputStreamReader reader = new InputStreamReader(input, StandardCharsets.UTF_8);
             prop = new Properties();
             prop.load(reader);
@@ -51,10 +59,7 @@ public class Configuration {
             return configuration;
 
         } catch (IOException e) {
-            System.out.println("Configuration file not found.");
-            e.printStackTrace();
-            System.exit(1);
-
+           AdminLogCollector.logErrorAndExit("Configuration file not found.",e);
         }
 
         return null;
@@ -107,8 +112,7 @@ public class Configuration {
 
             }
         } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            AdminLogCollector.logWarning("Exception in getting CSRFTokenEndpoint", e);
         }
 
         // default

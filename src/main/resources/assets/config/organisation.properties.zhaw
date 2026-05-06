@@ -11,11 +11,13 @@ metadata.sherpa.section = zhawdescriptionclassic
 metadata.csv = zhaw.oastatus.aurora
 metadata.csv.section = zhawdescriptionclassic
 
-url.sherpa =  https://v2.sherpa.ac.uk/cgi/retrieve_by_id/cgi/retrieve_by_id?item-type=publication&format=Json
+url.sherpa =  https://api.openpolicyfinder.jisc.ac.uk/retrieve_by_id?item-type=publication&format=Json
 
-organisation.repositoryAPI  = https://digitalcollection-dev.zhaw.ch/server/api
+organisation.repositoryAPI  =${app.url}/server/api
 organisation.policyList = files/input/self-archiving-policies.csv
 organisation.unsuccessfulItemList = /var/lib/tomcat-current/webapps/hsb-dspace/aurora/output/unsuccessful-item-list.csv
 organisation.itemsPerPage = 100
+organisation.mail.admin = apps.hsb@zhaw.ch
+organisation.mail.helpdesk = digitalcollection@zhaw.ch
 
 dspace.version = 8.2.0

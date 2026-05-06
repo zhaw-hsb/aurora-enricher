@@ -9,7 +9,10 @@
 package ch.zhaw.hsb.aurora.enricher.Service.Provider;
 
 import java.lang.reflect.Method;
+import java.net.URLEncoder;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -17,7 +20,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import ch.zhaw.hsb.aurora.enricher.Configuration.Configuration;
-import ch.zhaw.hsb.aurora.enricher.Configuration.PropertyCredentials;
+import ch.zhaw.hsb.aurora.enricher.Configuration.PropertyCredentialsConfiguration;
+import ch.zhaw.hsb.aurora.enricher.LogCollector.AdminLogCollector;
 import ch.zhaw.hsb.aurora.enricher.Model.Enrichment.EnrichmentModel;
 import ch.zhaw.hsb.aurora.enricher.Model.Item.ItemAbstract;
 import ch.zhaw.hsb.aurora.enricher.Service.Request.HTTPService;
@@ -43,11 +47,11 @@ public abstract class SherpaRomeoServiceAbstract extends ProviderServiceAbstract
 
     public EnrichmentModel getFilledEnrichmentModel(ItemAbstract item) {
 
-        EnrichmentModel enrichmentModel = null;
+        if (item == null || item.getIssn() == null){
+            return null;
+        }
 
-        enrichmentModel = this.fetchInfoWithISSN(item.getIssn());
-
-        return enrichmentModel;
+        return this.fetchInfoWithISSN(item.getIssn());
 
     }
 
@@ -57,13 +61,12 @@ public abstract class SherpaRomeoServiceAbstract extends ProviderServiceAbstract
 
         String jsonData;
 
-        PropertyCredentials propertyCredentials = new PropertyCredentials();
+        PropertyCredentialsConfiguration propertyCredentials = new PropertyCredentialsConfiguration();
 
-        String sherpaBaseURL = Configuration.getInstance().getProviderUrl(this.name) + "&api-key="
-                + propertyCredentials.getProviderAPIKey(this.name);
+        String sherpaBaseURL = Configuration.getInstance().getProviderUrl(this.name);
         HttpResponse<String> response = HTTPService.sendRequest(null, null,
-                sherpaBaseURL + "&identifier=" + ISSN,
-                "GET", null);
+                sherpaBaseURL + "&identifier=" + URLEncoder.encode(ISSN, StandardCharsets.UTF_8),
+                "GET", Map.of("x-api-key", propertyCredentials.getProviderAPIKey(this.name)));
 
         if (response != null) {
             jsonData = response.body();
@@ -117,8 +120,7 @@ public abstract class SherpaRomeoServiceAbstract extends ProviderServiceAbstract
 
                 }
             } catch (JsonProcessingException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                AdminLogCollector.logErrorAndExit("Information could not be fetched with ISSN.", e);
             }
         }
 
@@ -149,7 +151,8 @@ public abstract class SherpaRomeoServiceAbstract extends ProviderServiceAbstract
                     }
 
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    AdminLogCollector.logWarning("Exclusion criterias could not be checked.", e);
+                    return true;
                 }
             }
         }

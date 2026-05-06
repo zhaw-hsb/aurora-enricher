@@ -12,7 +12,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+import ch.zhaw.hsb.aurora.enricher.Configuration.PropertyCredentialsConfiguration;
 import ch.zhaw.hsb.aurora.enricher.Controller.EnrichmentControllerAbstract;
+import ch.zhaw.hsb.aurora.enricher.LogCollector.AdminLogCollector;
+import ch.zhaw.hsb.aurora.enricher.Service.Email.EmailReportService;
+import ch.zhaw.hsb.aurora.enricher.Service.Email.EmailService;
 
 /**
  * This class starts the enricher application and takes arguments
@@ -23,14 +27,23 @@ import ch.zhaw.hsb.aurora.enricher.Controller.EnrichmentControllerAbstract;
 public class Main {
 
     public static void main(String[] args) {
+        
+        EmailReportService emailReportService = new EmailReportService(new EmailService(new PropertyCredentialsConfiguration()));
+
+        //on errors send email and exit program
+        AdminLogCollector.setOnErrorHandler(errors -> {
+            emailReportService.sendReports(true);
+            System.exit(1);
+        });
 
         if (args.length == 0) {
-            throw new IllegalArgumentException("Missing arguments.");
+            AdminLogCollector.logErrorAndExit("Missing arguments.",null);
         }
 
         Class<?> controller = null;
         List<Class<?>> itemModelClassList = new ArrayList<>();
         String id = null;
+        Boolean updateAll = false;
 
         for (int i = 0; i < args.length; i++) {
 
@@ -38,12 +51,10 @@ public class Main {
                 case "-controller":
                     String controllerName = args[++i];
                     try {
-                        System.out.println("Controller: "+controllerName);
+                        AdminLogCollector.logInfo("Controller: "+controllerName);
                         controller = Class.forName("ch.zhaw.hsb.aurora.enricher.Controller." + controllerName);
                     } catch (ClassNotFoundException e) {
-                        System.out.println("Controller " + controllerName + " not found.");
-                        System.exit(1);
-
+                        AdminLogCollector.logErrorAndExit("Controller " + controllerName + " not found.",e);
                     }
                     break;
                 case "-items":
@@ -57,8 +68,7 @@ public class Main {
                                     .forName("ch.zhaw.hsb.aurora.enricher.Model.Item." + itemTypeName));
                         } catch (ClassNotFoundException e) {
 
-                            System.out.println("Item " + itemTypeName + " not found.");
-                            System.exit(1);
+                            AdminLogCollector.logErrorAndExit("Item " + itemTypeName + " not found.",e);
                         }
 
                     }
@@ -69,6 +79,10 @@ public class Main {
                     id = args[++i];
                     break;
 
+                case "-updateAll":
+                    updateAll = true;
+                    break;
+
                 default:
                     break;
             }
@@ -76,12 +90,17 @@ public class Main {
         }
 
         try {
-            Class<?>[] paramTypes = { String.class, List.class };
+            Class<?>[] paramTypes = { String.class, List.class, Boolean.class };
 
             EnrichmentControllerAbstract controllerInstance = (EnrichmentControllerAbstract) controller.getConstructor(paramTypes)
-                    .newInstance(id, itemModelClassList);
+                    .newInstance(id, itemModelClassList, updateAll);
             controllerInstance.enrichAction();
 
+
+            // Send email reports
+            emailReportService.sendReports(false);
+
+   
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
                 | NoSuchMethodException | SecurityException e) {
             // TODO Auto-generated catch block

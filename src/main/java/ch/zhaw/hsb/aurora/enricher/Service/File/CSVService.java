@@ -29,6 +29,7 @@ import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 
 import ch.zhaw.hsb.aurora.enricher.Main;
+import ch.zhaw.hsb.aurora.enricher.LogCollector.AdminLogCollector;
 import ch.zhaw.hsb.aurora.enricher.Model.Item.ItemAbstract;
 
 /**
@@ -55,7 +56,7 @@ public class CSVService {
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
+            AdminLogCollector.logErrorAndExit("Could not read CSV into map.", e);
         }
 
         return records;
@@ -87,7 +88,8 @@ public class CSVService {
             }
 
         } catch (IOException | ReflectiveOperationException e) {
-            e.printStackTrace();
+            AdminLogCollector.logErrorAndExit("Could not write to CSV.", e);
+
         }
 
     }

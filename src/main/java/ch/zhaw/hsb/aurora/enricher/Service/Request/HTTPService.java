@@ -23,6 +23,7 @@ import java.util.NoSuchElementException;
 import java.util.Map.Entry;
 
 import ch.zhaw.hsb.aurora.enricher.Configuration.Configuration;
+import ch.zhaw.hsb.aurora.enricher.LogCollector.AdminLogCollector;
 
 /**
  * This class is the service for HTTP actions.
@@ -66,8 +67,7 @@ public class HTTPService {
                 Configuration.getInstance().getOrganisationField("repositoryAPI") + Configuration.getInstance().getCSRFTokenEndpoint(), "GET", null);
 
         if (response == null) {
-            System.out.println("Could not get XSRF Token from Repository. Try again.");
-            System.exit(1);
+            AdminLogCollector.logErrorAndExit("Could not get XSRF Token from Repository. Try again.", null);
         }
 
         xsrfToken = response.headers().firstValue("DSPACE-XSRF-TOKEN").get();
@@ -137,8 +137,7 @@ public class HTTPService {
             }
 
         } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            AdminLogCollector.logErrorAndExit("Request could not be sent.", e);
         }
 
         return null;
@@ -196,15 +195,16 @@ public class HTTPService {
                     xsrfToken = response.headers().firstValue("DSPACE-XSRF-TOKEN").get();
 
                 } catch (NoSuchElementException e) {
-                    // TODO: handle exception
+                    //no log else it will just fill the whole mail with this
+                    // AdminLogCollector.logWarning("DSPACE-XSRF-TOKEN could not be retrieved.", e);
+
                 }
 
                 return response;
             }
 
         } catch (Exception e) {
-            System.out.println("Request to Repository unsuccessfull.");
-            System.exit(1);
+            AdminLogCollector.logErrorAndExit("Request to Repository unsuccessfull.",e);
         }
 
         return null;

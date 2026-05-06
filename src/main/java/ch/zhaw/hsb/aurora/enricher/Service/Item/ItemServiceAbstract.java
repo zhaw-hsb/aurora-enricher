@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import ch.zhaw.hsb.aurora.enricher.Configuration.Configuration;
+import ch.zhaw.hsb.aurora.enricher.LogCollector.AdminLogCollector;
 import ch.zhaw.hsb.aurora.enricher.Model.Enrichment.EnrichmentModel;
 import ch.zhaw.hsb.aurora.enricher.Model.Item.ItemAbstract;
 
@@ -120,7 +121,7 @@ abstract public class ItemServiceAbstract implements ItemServiceInterface {
                     inputValue = inputValue + fieldName + ": " + value;
 
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    AdminLogCollector.logErrorAndExit("Field input could not be prepared.", e);
                 }
             }
         }

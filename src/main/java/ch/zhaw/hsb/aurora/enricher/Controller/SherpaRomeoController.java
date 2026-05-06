@@ -21,12 +21,13 @@ import ch.zhaw.hsb.aurora.enricher.Organisation.Service.Provider.OrganisationsSh
  */
 public class SherpaRomeoController extends OrganisationControllerAbstract {
 
-    public SherpaRomeoController(String uuid, List<Class<?>> itemModelClassList) {
+    public SherpaRomeoController(String uuid, List<Class<?>> itemModelClassList, Boolean updateAll) {
 
         this.organisationProviderService = new OrganisationsSherpaRomeoService(this.getName());
 
         this.uuid = uuid;
         this.itemModelClassList = itemModelClassList;
+        this.updateAll = updateAll;
 
     }
 

@@ -1,3 +1,5 @@
 src/main/resources/assets/config/credentials.*
 target/
 bin
+src/main/resources/assets/config/*-local.properties
+Jenkinsfile

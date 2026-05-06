@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import ch.zhaw.hsb.aurora.enricher.Configuration.Configuration;
+import ch.zhaw.hsb.aurora.enricher.LogCollector.AdminLogCollector;
 import ch.zhaw.hsb.aurora.enricher.Model.Enrichment.EnrichmentModel;
 import ch.zhaw.hsb.aurora.enricher.Model.Item.ItemAbstract;
 import ch.zhaw.hsb.aurora.enricher.Model.Item.PublishedItem;
@@ -42,7 +43,7 @@ public class PublishedItemService extends OrganisationItemServiceAbstract implem
     }
 
     @Override
-    public List<ItemAbstract> getItems(String query, String controllerName) {
+    public List<ItemAbstract> getItems(String missingMetadataFilter, String controllerName) {
 
         List<ItemAbstract> itemModelList = new ArrayList<>();
 
@@ -52,8 +53,14 @@ public class PublishedItemService extends OrganisationItemServiceAbstract implem
         while (currentPage <= lastPage) {
 
             //f.has_content_in_original_bundle=false,equals filter to only receive the ones without fulltext
-            HttpResponse<String> response = HTTPService.sendRequest(null, null, this.getBaseURL() + "&page="
-                    + currentPage + "&"+"f.has_content_in_original_bundle=false,equals"+ "&"+ query + "+dc.type:"+ URLEncoder.encode(this.getTypeFilter(controllerName), StandardCharsets.UTF_8), "GET", null);
+            String url = this.getBaseURL() + "&page="+ currentPage + "&"+"f.has_content_in_original_bundle=false,equals"+ "&query=" 
+                            + "dc.type:"+ URLEncoder.encode(this.getTypeFilter(controllerName), StandardCharsets.UTF_8);
+
+            if(!missingMetadataFilter.isEmpty()){
+                        url = url.concat(missingMetadataFilter);
+                }
+
+            HttpResponse<String> response = HTTPService.sendRequest(null, null, url, "GET", null);
 
             String jsonData;
             if (response != null) {
@@ -87,8 +94,7 @@ public class PublishedItemService extends OrganisationItemServiceAbstract implem
 
 
                 } catch (JsonProcessingException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    AdminLogCollector.logErrorAndExit("Items could not be retrieved.", e);
                 }
 
                 
@@ -142,8 +148,7 @@ public class PublishedItemService extends OrganisationItemServiceAbstract implem
         
                 return this.getMetadataFromItem(publishedItem, metadata);
             } catch (JsonProcessingException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                AdminLogCollector.logErrorAndExit("Item could not be retrieved.", e);
             }
        
         }

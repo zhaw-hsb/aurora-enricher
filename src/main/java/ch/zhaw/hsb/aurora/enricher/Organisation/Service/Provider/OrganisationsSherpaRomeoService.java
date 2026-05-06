@@ -25,24 +25,27 @@ public class OrganisationsSherpaRomeoService extends SherpaRomeoServiceAbstract 
 
         public OrganisationsSherpaRomeoService(String name) {
                 super(name);
-                // TODO Auto-generated constructor stub
         }
 
         public boolean firstExclusionCriteria(JsonNode permittedOA) {
 
                 String matchLocations = Configuration.getInstance().getMatchStringField(this.name + ".location");
 
-                ArrayNode locationPhrases = (ArrayNode) permittedOA.get("location")
-                                .get("location_phrases");
+                JsonNode locationPhrases = permittedOA.path("location")
+                                .path("location_phrases");
 
-                for (int l = 0; l < locationPhrases.size(); l++) {
+                if(locationPhrases.isArray()){
+                        for (int l = 0; l < locationPhrases.size(); l++) {
 
-                        String locationPhrase = locationPhrases.get(l).get("phrase").asText();
-                        if (locationPhrase.matches(matchLocations)) {
-                                return false;
-                        }
+                                String locationPhrase = locationPhrases.path(l).path("phrase").asText();
+                                if (locationPhrase.matches(matchLocations)) {
+                                        return false;
+                                }
 
+                        }      
                 }
+
+                
 
                 return true;
 
@@ -50,21 +53,22 @@ public class OrganisationsSherpaRomeoService extends SherpaRomeoServiceAbstract 
 
         public boolean secondExclusionCriteria(JsonNode permittedOA) {
 
-                String additionalOAfee = permittedOA.get("additional_oa_fee").asText();
+               
+                JsonNode additionalOAfee = permittedOA.path("additional_oa_fee");
 
-                if (additionalOAfee.equals("no")) {
-                        return false;
-                }
 
-                return true;
+                return !additionalOAfee.isMissingNode() && !additionalOAfee.asText().equals("no");
+
+        
+                
         }
 
         public boolean thirdExclusionCriteria(JsonNode permittedOA) {
 
                 String matchVersions = Configuration.getInstance().getMatchStringField(this.name + ".version");
 
-                String version = permittedOA.get("article_version_phrases").get(0)
-                                .get("phrase").asText();
+                String version = permittedOA.path("article_version_phrases").path(0)
+                                .path("phrase").asText();
 
                 if (version.matches(matchVersions)) {
 
@@ -91,40 +95,18 @@ public class OrganisationsSherpaRomeoService extends SherpaRomeoServiceAbstract 
         public EnrichmentModel fillEnrichmentModel(String uri, JsonNode permittedOA) {
 
                 EnrichmentModel enrichmentModel = new EnrichmentModel();
+         
+                enrichmentModel.setUri(uri);
+        
+                enrichmentModel.setEmbargoUnit(permittedOA.path("embargo").path("units").asText());
 
-                try {
-                        enrichmentModel.setUri(uri);
+                enrichmentModel.setEmbargoAmount(permittedOA.path("embargo").path("amount").asInt(-1));
 
-                } catch (NullPointerException e) {
+                enrichmentModel.setLicense(permittedOA.path("license").path(0)
+                                .path("license_phrases").path(0).path("phrase").asText());
 
-                }
-                try {
-                        enrichmentModel.setEmbargoUnit(permittedOA.get("embargo").get("units").asText());
-
-                } catch (NullPointerException e) {
-
-                }
-                try {
-                        enrichmentModel.setEmbargoAmount(permittedOA.get("embargo").get("amount").asInt());
-
-                } catch (NullPointerException e) {
-
-                }
-                try {
-                        enrichmentModel.setLicense(permittedOA.get("license").get(0)
-                                        .get("license_phrases").get(0).get("phrase").asText());
-
-                } catch (NullPointerException e) {
-
-                }
-                try {
-
-                        enrichmentModel.setVersion(permittedOA.get("article_version_phrases").get(0)
-                                        .get("phrase").asText());
-
-                } catch (NullPointerException e) {
-
-                }
+                enrichmentModel.setVersion(permittedOA.path("article_version_phrases").path(0)
+                                .path("phrase").asText());
 
                 return enrichmentModel;
 
@@ -143,11 +125,9 @@ public class OrganisationsSherpaRomeoService extends SherpaRomeoServiceAbstract 
                         while (nextK < permittedOAs.size()) {
                                 String nextVersion;
 
-                                nextVersion = permittedOAs.get(nextK)
-                                                .get("article_version_phrases").get(0)
-                                                .get("phrase").asText();
-
-                                nextVersion = nextVersion == null ? "undefined" : nextVersion;
+                                nextVersion = permittedOAs.path(nextK)
+                                                .path("article_version_phrases").path(0)
+                                                .path("phrase").asText("undefined");
 
                                 if (nextVersion.equals("Published")) {
                                         return true;

@@ -19,6 +19,7 @@ Der Enricher wurde im Rahmen des von swissuniversities ko-finanzierten Projekts 
     - [Optionen](#optionen)
     - [Beispiele](#beispiele)
 - [Konfigurationen](#konfigurationen)
+    - [Logmails](#logmails)
 - [Controllers](#controllers)
     - [EnrichmentControllerAbstract](#enrichmentcontrollerabstract)
     - [SherpaRomeoController](#sherparomeocontroller)
@@ -63,6 +64,14 @@ Falls keine UUID angegeben wird, führt das Tool die Anreicherung über alle Ite
    ```
    mvn clean package
    ```
+   oder mit Profil (siehe [Konfigurationen](#konfigurationen))
+  ```
+  mvn clean package -Pdev
+  mvn clean package -Ptest
+  mvn clean package -Pprod
+  ```
+  Die Datei befindet sich dann im target Ordner.
+
 - Prozesseinbindung im DSpace durchführen
 
 ## Verwendung
@@ -70,7 +79,7 @@ Falls keine UUID angegeben wird, führt das Tool die Anreicherung über alle Ite
 Führen Sie den Befehl in folgendem Format aus:
 
 ```bash
- java -jar ./target/enricher-jar-with-dependencies.jar -controller [option] -items [option] -id [option]
+ java -jar ./target/enricher-jar-with-dependencies.jar -controller [option] -items [option] -id [option] -updateAll
 ```
 
 ### Optionen
@@ -79,6 +88,8 @@ Führen Sie den Befehl in folgendem Format aus:
 | `-controller` | Der Name des Controllers, welcher verwendet werden soll.<br> <br>Zum Beispiel: <br>SherpaRomeoController  | Ja       |
 | `-items` |   Die Art des/der Items. WorkflowItem, PublishedItem oder beide.  | Ja |
 | `-id` | Die UUID eines Items aus dem Repositorium.| Nein |
+| `-updateAll` | Sollten auch die bereits angereicherten Publikationen einer erneuten Prüfung unterzogen werden, wird die Flag aktiviert.| Nein |
+
 ### Beispiele
 ```bash
 -controller CSVController -items WorkflowItem -id 8032f56a-8b1a-4edd-ae44-17ab8b51bf17
@@ -86,6 +97,8 @@ Führen Sie den Befehl in folgendem Format aus:
 -controller SherpaRomeoController -items PublishedItem
 
 -controller SherpaRomeoController -items PublishedItem,WorkflowItem
+
+-controller SherpaRomeoController -items PublishedItem -updateAll
 ```
 
 ## Konfigurationen
@@ -97,12 +110,53 @@ Im ./src/main/resources/assets/config/organisation.properties
 |matchString.{providerName}.version|Akzeptierte Dokumentenversionen, verschiedene Versionstypen werden mit \| getrennt.|Ja für SherpaRomeo.|matchString.sherpa.version = Published\|Accepted|
 |metadata.{providerName}|Metadatenfeld im Repositorium,wo die Informationen zur Zweitveröffentlichung gespeichert werden sollen.|Ja|metadata.sherpa = zhaw.oastatus.aurora|
 |metadata.{providerName}.section|Die Sektion im Repository des Metadatenfeldes, welches die Informationen zur Zweitveröffentlichung speichert. |Ja, ausser die Section wird dynamisch festgelegt.|metadata.sherpa.section = zhawdescriptionclassic|
-|url.{providerName}|Die URL der API des Providers.|Ja für SherpaRomeo|url.sherpa =  https://v2.sherpa.ac.uk/cgi/retrieve_by_id/cgi/retrieve_by_id?item-type=publication&format=Json|
-|organisation.repositoryAPI| URL der Server API des Repositoriums.|Ja|https://digitalcollection.zhaw.ch/server/api|
+|url.{providerName}|Die URL der API des Providers.|Ja für SherpaRomeo|url.sherpa =  https://api.openpolicyfinder.jisc.ac.uk/retrieve_by_id?item-type=publication&format=Json|
+|organisation.repositoryAPI| URL der Server API des Repositoriums.|Ja|https://digitalcollection.zhaw.ch/server/api oder ${app.url}/server/api (mit pom.xml Profilen) |
 |organisation.policyList |Der Pfad zur Liste mit den Informationen zur Zweitveröffentlichung.|Ja für CSV Controller.|organisation.policyList = files/input/self-archiving-policies.csv|
 |organisation.unsuccessfulItemList|Der Pfad zur Liste mit den Items, bei denen die Anreicherung erfolglos war.|Ja|organisation.unsuccessfulItemList = /pfad/zum/output/ordner/unsuccessful-item-list.csv|
 |organisation.itemsPerPage|Wie viele Items pro Seite von der API abgefragt werden sollen.|Ja|organisation.itemsPerPage = 100|
 |dspace.version|DSpace Version, um festzulegen, wie das csrf-Token empfangen wird.|Yes|dspace.version = 7.6.0|
+
+Konfiguration im pom.xml, falls die organisation.repositoryAPI Url je nach Umgebung (Maven Profil) angepasst werden soll. Beispiel für eine Prod und Test Umgebung mit unterschiedlicher URL:
+
+```
+<profiles>
+  <profile>
+    <id>test</id>
+    <properties>
+      <maven.compiler.source>
+        17
+      </maven.compiler.source>
+      <maven.compiler.target>
+        17
+      </maven.compiler.target>
+      <encoding>
+        UTF-8
+      </encoding>
+      <app.url>
+        https://digitalcollection-test.zhaw.ch
+      </app.url>
+    </properties>
+  </profile>
+  <profile>
+    <id>prod</id>
+    <properties>
+      <maven.compiler.source>
+        17
+      </maven.compiler.source>
+      <maven.compiler.target>
+        17
+      </maven.compiler.target>
+      <encoding>
+        UTF-8
+      </encoding>
+      <app.url>
+        https://digitalcollection.zhaw.ch
+      </app.url>
+    </properties>
+  </profile>
+</profiles>
+```
 
 
 Um das Metadatenfeld anreichern zu können, wird im Repositorium ein Benutzer mit Admin- und Workflow-Rechten angelegt, der Zugriff auf die Items hat.
@@ -115,7 +169,33 @@ Im ./src/main/resources/assets/config/credentials.properties
 |password|Das Passwort des Users.|Ja|admin123|
 |apikey.sherpa|Der API Schlüssel für SherpaRomeo.|Ja|XXX-XXX|
 
+<a name="logmails"/>
 
+### Logmails
+src/main/resources/assets/config/organisation.properties
+
+Die Logs werden in zwei Kategorien (Admin / Helpdesk) gesammelt und am Ende des Programms an die jeweilige E-Mail-Adresse versendet.
+
+| Feldname      | Beschreibung  | Pflicht  | Beispiel  |
+| ------------- | ------------- | ------------- | ------------- |
+| organisation.mail.admin	 | Emailempfänger für Adminlogs.	 | Ja | manumusterperson@muster.ch |
+| organisation.mail.helpdesk	 | Emailempfänger für Helpdesklogs.	 | Ja | manumusterperson@muster.ch |
+
+src/main/resources/assets/config/credentials.properties
+| Feldname      | Beschreibung  | Pflicht  | Beispiel  |
+| ------------- | ------------- | ------------- | ------------- |
+| mail	 | Emailadresse des Absenders der Logmails.	 | Ja | manumusterperson@muster.ch |
+| mail.password	 | Passwort der Emailadresse des Absenders der Logmails.	 | Ja | admin123 |
+
+Die LogCollectors und der EmailReportService befinden sich hier:
+- src/main/java/ch/zhaw/hsb/aurora/enricher/Service/Email/EmailReportService.java
+- src/main/java/ch/zhaw/hsb/aurora/enricher/LogCollector/AdminLogCollector.java
+- src/main/java/ch/zhaw/hsb/aurora/enricher/LogCollector/HelpdeskLogCollector.java
+
+Es können verschiedene Logs gesammelt werden:
+- Informationen (logInfo) - HelpdeskLogCollector und AdminLogCollector
+- Warnungen (logWarning) - nur beim AdminLogCollector
+- Fehler (logErrorAndExit) - nur beim AdminLogCollector und das Programm wird beendet.
 
 ## Controllers
 

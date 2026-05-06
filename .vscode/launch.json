@@ -5,79 +5,137 @@
     "version": "0.2.0",
     "configurations": [
 
+
+        //ZHAW CSV
+
         {
             "type": "java",
-            "name": "Main CSV mit Workflowitem one",
+            "name": "Main ZHAW CSV 1 Workflowitem",
             "request": "launch",
             "mainClass": "ch.zhaw.hsb.aurora.enricher.Main",
-            "args": "-controller CSVController -items WorkflowItem -id 8032f56a-8b1a-4edd-ae44-17ab8b51bf17"
+            "args": "-controller CSVController -items WorkflowItem -id 9b38f9bf-2f04-45b8-8b50-0cc59cacca97"
         },
         {
             "type": "java",
-            "name": "Main CSV mit PublishedItem one",
+            "name": "Main ZHAW CSV 1 PublishedItem",
             "request": "launch",
             "mainClass": "ch.zhaw.hsb.aurora.enricher.Main",
-            "args": "-controller CSVController -items PublishedItem -id 0a355db9-5dbb-4d8e-85bf-af1968645e23" //fhnw: , zhaw: 0a355db9-5dbb-4d8e-85bf-af1968645e23
+            "args": "-controller CSVController -items PublishedItem -id 34788a7d-5c0c-4346-bfc3-50a85dbf5b23"
+        },
+
+        //ZHAW Sherpa
+
+        {
+            "type": "java",
+            "name": "Main ZHAW Sherpa 1 Workflowitem",
+            "request": "launch",
+            "mainClass": "ch.zhaw.hsb.aurora.enricher.Main",
+            "args": "-controller SherpaRomeoController -items WorkflowItem -id b35a141d-79f5-428f-88e0-6be1ee714395"
         },
         {
             "type": "java",
-            "name": "Main CSV mit Workflowitem all",
+            "name": "Main ZHAW Sherpa 1 PublishedItem",
+            "request": "launch",
+            "mainClass": "ch.zhaw.hsb.aurora.enricher.Main",
+            "args": "-controller SherpaRomeoController -items PublishedItem -id 3114133b-b13b-4442-9ad1-c332053328be"
+        },
+        {
+            "type": "java",
+            "name": "Main ZHAW Sherpa 1 PublishedItem bad type",
+            "request": "launch",
+            "mainClass": "ch.zhaw.hsb.aurora.enricher.Main",
+            "args": "-controller SherpaRomeoController -items PublishedItem -id 04899546-bb97-4c10-85a1-e37d7e0dd0ae"
+        },
+
+
+
+        //FHNW CSV
+/*         {
+            "type": "java",
+            "name": "Main FHNW CSV 1 Workflowitem",
+            "request": "launch",
+            "mainClass": "ch.zhaw.hsb.aurora.enricher.Main",
+            "args": "-controller CSVController -items WorkflowItem -id "
+        },
+        {
+            "type": "java",
+            "name": "Main FHNW CSV 1 PublishedItem",
+            "request": "launch",
+            "mainClass": "ch.zhaw.hsb.aurora.enricher.Main",
+            "args": "-controller CSVController -items PublishedItem -id " 
+        }, */
+
+        //FHNW Sherpa
+        {
+            "type": "java",
+            "name": "Main FHNW Sherpa 1 Workflowitem",
+            "request": "launch",
+            "mainClass": "ch.zhaw.hsb.aurora.enricher.Main",
+            "args": "-controller SherpaRomeoController -items WorkflowItem -id 2add597e-8135-4f3b-bdd2-5653fa13ccd5"
+        },
+        {
+            "type": "java",
+            "name": "Main FHNW Sherpa 1 PublishedItem",
+            "request": "launch",
+            "mainClass": "ch.zhaw.hsb.aurora.enricher.Main",
+            "args": "-controller SherpaRomeoController -items PublishedItem -id 15152308-5f55-40e8-bb4e-918a2be43414"
+        },
+
+
+        //ALL - CSV and/or Sherpa - not organisation specific
+
+        {
+            "type": "java",
+            "name": "Main CSV all Workflowitem",
             "request": "launch",
             "mainClass": "ch.zhaw.hsb.aurora.enricher.Main",
             "args": "-controller CSVController -items WorkflowItem"
         },
+                {
+            "type": "java",
+            "name": "Main CSV all Workflowitem updateAll",
+            "request": "launch",
+            "mainClass": "ch.zhaw.hsb.aurora.enricher.Main",
+            "args": "-controller CSVController -items WorkflowItem -updateAll"
+        },
         {
             "type": "java",
-            "name": "Main CSV mit PublishedItem all",
+            "name": "Main CSV all PublishedItem",
             "request": "launch",
             "mainClass": "ch.zhaw.hsb.aurora.enricher.Main",
             "args": "-controller CSVController -items PublishedItem"
         },
         {
             "type": "java",
-            "name": "Main CSV  mit PublishedItem and WorkflowItem all",
+            "name": "Main CSV all PublishedItem WorkflowItem",
             "request": "launch",
             "mainClass": "ch.zhaw.hsb.aurora.enricher.Main",
             "args": "-controller CSVController -items WorkflowItem,PublishedItem"
         },
         {
             "type": "java",
-            "name": "Main Sherpa mit Workflowitem one",
-            "request": "launch",
-            "mainClass": "ch.zhaw.hsb.aurora.enricher.Main",
-            "args": "-controller SherpaRomeoController -items WorkflowItem -id cd5acf6e-d043-4417-9c41-e57f22d42cbd"
-        },
-        {
-            "type": "java",
-            "name": "Main Sherpa mit PublishedItem one",
-            "request": "launch",
-            "mainClass": "ch.zhaw.hsb.aurora.enricher.Main",
-            "args": "-controller SherpaRomeoController -items PublishedItem -id 17f886b0-325a-4dab-b009-01e8ff71aca7"  //fhnw: 15152308-5f55-40e8-bb4e-918a2be43414, zhaw:12adbcb9-3519-4f3a-a51c-e2e99b4dc569
-        },
-        {
-            "type": "java",
-            "name": "Main Sherpa mit PublishedItem one with bad TYPE",
-            "request": "launch",
-            "mainClass": "ch.zhaw.hsb.aurora.enricher.Main",
-            "args": "-controller SherpaRomeoController -items PublishedItem -id 04899546-bb97-4c10-85a1-e37d7e0dd0ae"
-        },
-        {
-            "type": "java",
-            "name": "Main Sherpa mit Workflowitem all",
+            "name": "Main Sherpa all Workflowitem",
             "request": "launch",
             "mainClass": "ch.zhaw.hsb.aurora.enricher.Main",
             "args": "-controller SherpaRomeoController -items WorkflowItem"
         },
         {
             "type": "java",
-            "name": "Main Sherpa mit PublishedItem all",
+            "name": "Main Sherpa all PublishedItem",
             "request": "launch",
             "mainClass": "ch.zhaw.hsb.aurora.enricher.Main",
             "args": "-controller SherpaRomeoController -items PublishedItem"
         },
         {
             "type": "java",
-            "name": "Main Sherpa mit PublishedItem and WorkflowItem all",
+            "name": "Main Sherpa all PublishedItem updateAll",
+            "request": "launch",
+            "mainClass": "ch.zhaw.hsb.aurora.enricher.Main",
+            "args": "-controller SherpaRomeoController -items PublishedItem -updateAll"
+        },
+        {
+            "type": "java",
+            "name": "Main Sherpa all PublishedItem WorkflowItem",
             "request": "launch",
             "mainClass": "ch.zhaw.hsb.aurora.enricher.Main",
             "args": "-controller SherpaRomeoController -items PublishedItem,WorkflowItem"

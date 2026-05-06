@@ -9,7 +9,7 @@ matchString.sherpa.version = Published|Accepted
 metadata.sherpa = fhnw.oastatus.aurora
 metadata.csv = fhnw.oastatus.aurora
 
-url.sherpa =  https://v2.sherpa.ac.uk/cgi/retrieve_by_id/cgi/retrieve_by_id?item-type=publication&format=Json
+url.sherpa =  https://api.openpolicyfinder.jisc.ac.uk/retrieve_by_id?item-type=publication&format=Json
 
 organisation.repositoryAPI  = https://irf.test.fhnw.ch/server/api
 organisation.policyList = files/input/self-archiving-policies.csv
