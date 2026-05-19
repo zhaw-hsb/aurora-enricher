@@ -47,10 +47,10 @@ public class AuthenticationService {
 
         String username = propertyCredentials.getUsername();
         String password = propertyCredentials.getPassword();
+        String body = "user=" + username + "&password=" + password;
 
-        HttpResponse<String> response = HTTPService.sendRequest("", "text/plain",
-                this.repositoryAPIUrl + "/authn/login?user=" + username + "&password=" +
-                        URLEncoder.encode(password, StandardCharsets.UTF_8),
+        HttpResponse<String> response = HTTPService.sendRequest(body, "application/x-www-form-urlencoded",
+                this.repositoryAPIUrl + "/authn/login",
                 "POST", null);
 
         if (response != null) {
